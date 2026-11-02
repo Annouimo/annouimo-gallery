@@ -14,9 +14,11 @@
  *   archive/bangumi/ranks/README.md
  */
 
+import { execFile } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { promisify } from 'node:util'
 
 const ROOT = process.cwd()
 const WORKS_PATH = join(ROOT, 'archive/bangumi/import/works.json')
@@ -33,6 +35,7 @@ const UNKNOWN_DATES = (process.env.BGM_UNKNOWN_DATES ?? '2023-05-28,2023-06-04')
   .map((value) => value.trim())
   .filter(Boolean)
 const MAX_PAGES = 30
+const execFileAsync = promisify(execFile)
 
 type Work = {
   id: string
@@ -61,14 +64,24 @@ async function fetchPage(page: number): Promise<string> {
   let lastError: unknown = null
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': BROWSER_UA,
-          Accept: 'text/html,application/xhtml+xml',
-        },
-      })
-      if (!response.ok) fail(`${response.status} ${response.statusText} for ${url}`)
-      return await response.text()
+      const { stdout } = await execFileAsync(
+        'curl',
+        [
+          '-sS',
+          '--http1.1',
+          '--compressed',
+          '-m',
+          '40',
+          '-A',
+          BROWSER_UA,
+          '-H',
+          'Accept: text/html,application/xhtml+xml',
+          url,
+        ],
+        { maxBuffer: 10 * 1024 * 1024 },
+      )
+      if (!stdout.includes('item_')) fail(`No collection items parsed from ${url}`)
+      return stdout
     } catch (error) {
       lastError = error
       if (attempt < 3) await sleep(2_000 * attempt)
