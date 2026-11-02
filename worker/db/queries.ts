@@ -8,6 +8,7 @@ import type {
   PublicLog,
   PublicWork,
   PublicWorkDetail,
+  DatePrecision,
   Work,
   WorkStatus,
   WorkWithState,
@@ -19,7 +20,7 @@ const WORK_SELECT = `
   SELECT
     w.id, w.title, w.creator, w.release_year, w.type, w.total_progress,
     w.short_review, w.long_review_url, w.added_at, w.created_at, w.updated_at,
-    w.legacy_id, w.deleted_at,
+    w.legacy_id, w.deleted_at, w.sort_rank, w.date_precision,
     l.seq AS latest_seq,
     l.event AS latest_event,
     l.status AS latest_status,
@@ -54,6 +55,8 @@ type WorkStateRow = {
   updated_at: number
   legacy_id: number | null
   deleted_at: number | null
+  sort_rank: number | null
+  date_precision: DatePrecision
   latest_seq: number | null
   latest_event: LogEvent | null
   latest_status: WorkStatus | null
@@ -96,6 +99,8 @@ function toWork(row: WorkStateRow): Work {
     updated_at: row.updated_at,
     legacy_id: row.legacy_id,
     deleted_at: row.deleted_at,
+    sort_rank: row.sort_rank,
+    date_precision: row.date_precision,
   }
 }
 
@@ -148,6 +153,8 @@ export function toPublicWork(work: WorkWithState): PublicWork {
     finished_on: work.state.finishedOn,
     is_reading: work.state.status === 'reading',
     is_read: work.state.finishedOn !== null,
+    sort_rank: work.sort_rank,
+    date_precision: work.date_precision,
   }
 }
 

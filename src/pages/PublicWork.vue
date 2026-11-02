@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { categoryForType, copyForType } from '../../shared/categories'
+import { UNKNOWN_DATE_LABEL } from '../../shared/constants'
 import type { PublicWorkDetail } from '../../shared/types'
 import { ApiError, getPublicWork } from '../lib/api'
 import { describeLog, progressSummary, statusLabel } from '../lib/format'
@@ -84,7 +85,10 @@ watch(
           <span v-if="work.release_year">{{ work.release_year }}</span>
           <span>{{ typeLabel }}</span>
           <span>{{ statusLabel(work.status, copy) }}</span>
-          <span v-if="work.finished_on">{{ copy.finishedOn }} {{ work.finished_on }}</span>
+          <span v-if="work.finished_on && work.date_precision === 'day'">
+            {{ copy.finishedOn }} {{ work.finished_on }}
+          </span>
+          <span v-else-if="work.date_precision !== 'day'">{{ UNKNOWN_DATE_LABEL }}</span>
         </p>
         <p class="progress">{{ progressSummary(work, copy) }}</p>
       </header>

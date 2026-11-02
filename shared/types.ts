@@ -7,6 +7,9 @@ export type LogEvent = (typeof LOG_EVENTS)[number]
 export const LOG_SOURCES = ['user', 'migration'] as const
 export type LogSource = (typeof LOG_SOURCES)[number]
 
+export const DATE_PRECISIONS = ['day', 'unknown'] as const
+export type DatePrecision = (typeof DATE_PRECISIONS)[number]
+
 export type Work = {
   id: string
   title: string
@@ -21,6 +24,10 @@ export type Work = {
   updated_at: number
   legacy_id: number | null
   deleted_at: number | null
+  /** Forced display order; only used when the completion date is unknown. */
+  sort_rank: number | null
+  /** Whether finished_on is a usable completion date. */
+  date_precision: DatePrecision
 }
 
 /** Minimal work fields for duplicate checks and pickers. */
@@ -71,6 +78,8 @@ export type PublicWork = {
   finished_on: string | null
   is_reading: boolean
   is_read: boolean
+  sort_rank: number | null
+  date_precision: DatePrecision
 }
 
 export type PublicLog = {

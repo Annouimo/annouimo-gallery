@@ -15,6 +15,7 @@
     "preview:ci": "wrangler preview",
     "test": "node node_modules/vitest/vitest.mjs run",
     "export:bangumi": "bun run scripts/export-bangumi.ts",
+    "sync:bangumi-ranks": "bun run scripts/sync-bangumi-ranks.ts",
     "test:watch": "node node_modules/vitest/vitest.mjs",
     "typecheck:test": "tsc --noEmit -p tsconfig.test.json"
   },

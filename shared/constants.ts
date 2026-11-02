@@ -13,6 +13,8 @@ export const STATUS_LABELS: Record<WorkStatus, string> = {
 
 export const STATUS_ORDER: WorkStatus[] = ['reading', 'wish', 'done', 'paused', 'dropped']
 
+export const UNKNOWN_DATE_LABEL = '未记年月'
+
 export const DEFAULT_TYPE = 'Book'
 export const DEFAULT_TOTAL_PROGRESS = 1
 

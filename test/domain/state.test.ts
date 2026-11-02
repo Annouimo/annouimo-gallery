@@ -27,6 +27,8 @@ function makeWork(overrides: Partial<Work> = {}): Work {
     updated_at: 1,
     legacy_id: null,
     deleted_at: null,
+    sort_rank: null,
+    date_precision: 'day',
     ...overrides,
   }
 }

@@ -40,6 +40,8 @@ const WORK_COLUMNS = [
   'updated_at',
   'legacy_id',
   'deleted_at',
+  'sort_rank',
+  'date_precision',
 ] as const
 
 const LOG_COLUMNS = [
@@ -147,6 +149,8 @@ export async function createWorkWithInitialLog(
     updated_at: now,
     legacy_id: null,
     deleted_at: null,
+    sort_rank: null,
+    date_precision: 'day',
   }
 
   const statements: D1PreparedStatement[] = [insertWorkStatement(db, work)]

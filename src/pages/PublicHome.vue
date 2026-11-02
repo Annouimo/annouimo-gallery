@@ -5,6 +5,7 @@ import { copyForCategory, findCategory } from '../../shared/categories'
 import type { CategoryCopy } from '../../shared/category-copy'
 import type { PublicHome as PublicHomeData, PublicWork } from '../../shared/types'
 import { getPublicCategory } from '../lib/api'
+import { groupArchive } from '../lib/archive-groups'
 import { clearSiteSearch, useSiteSearch } from '../lib/site-search'
 
 const props = defineProps<{ category: string }>()
@@ -35,19 +36,7 @@ const archive = computed(() => data.value?.archive.filter(matches) ?? [])
 const readCount = computed(() => reviews.value.length + archive.value.length)
 const hasResults = computed(() => reading.value.length + readCount.value > 0)
 
-const archiveGroups = computed(() => {
-  const groups: Array<{ year: string; works: PublicWork[] }> = []
-  for (const work of archive.value) {
-    const year = work.finished_on?.slice(0, 4) ?? ''
-    const last = groups.at(-1)
-    if (last && last.year === year) {
-      last.works.push(work)
-    } else {
-      groups.push({ year, works: [work] })
-    }
-  }
-  return groups
-})
+const archiveGroups = computed(() => groupArchive(archive.value))
 
 function readingProgress(work: PublicWork): string {
   return work.total_progress > 1
@@ -145,8 +134,13 @@ watch(
             <h2 id="archive-title" class="section-title">{{ copy.readSection }}</h2>
             <span class="section-count">{{ archive.length }}</span>
           </div>
-          <div v-for="group in archiveGroups" :key="group.year" class="year-group">
-            <h3 v-if="group.year" class="year-label">{{ group.year }}</h3>
+          <div
+            v-for="group in archiveGroups"
+            :key="group.key"
+            class="year-group"
+            :class="{ 'unknown-date': group.unknown }"
+          >
+            <h3 v-if="group.label" class="year-label">{{ group.label }}</h3>
             <ul class="archive-grid">
               <li v-for="work in group.works" :key="work.id">
                 <RouterLink class="archive-link" :to="`/works/${work.id}`">
