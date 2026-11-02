@@ -152,28 +152,27 @@ async function main(): Promise<void> {
     .sort((a, b) => a.title.localeCompare(b.title, 'zh-CN'))
 
   if (pageOrder.length === 0) fail('No collection items parsed from Bangumi pages')
-  if (oldWorks.size === 0) fail(`No works matched unknown dates: ${UNKNOWN_DATES.join(', ')}`)
+  if (pageOld.length === 0) fail(`No collection-page works matched unknown dates: ${UNKNOWN_DATES.join(', ')}`)
 
-  const ranked = [
-    ...pageOld.map((id) => oldWorks.get(id) as Work),
-    ...extras,
-  ].map((work, index) => ({
-    work_id: work.id,
-    rank: index + 1,
-    title: work.title,
-    finished_on: work.finished_on ?? null,
-  }))
-
-  if (ranked.length !== oldWorks.size) {
-    fail(`Rank mismatch: old works ${oldWorks.size}, ranked ${ranked.length}`)
-  }
+  // Only works that actually appear on the collection page get a rank. An
+  // old-date work that is not on the page is data that needs review (for
+  // example a mistaken "done" log), not an extra to append silently.
+  const ranked = pageOld.map((id, index) => {
+    const work = oldWorks.get(id) as Work
+    return {
+      work_id: work.id,
+      rank: index + 1,
+      title: work.title,
+      finished_on: work.finished_on ?? null,
+    }
+  })
 
   mkdirSync(OUT_DIR, { recursive: true })
   const ranksJson = `${JSON.stringify(ranked, null, 2)}\n`
   const sql = [
     '-- Forced order for works whose completion date is unknown.',
     `-- Generated for dates: ${UNKNOWN_DATES.join(', ')}.`,
-    `-- ${ranked.length} rows: ${pageOld.length} from the Bangumi collection page + ${extras.length} extras.`,
+    `-- ${ranked.length} rows from the Bangumi collection page.`,
     '-- Apply after migrations/0002_work_date_precision.sql.',
     '',
     ...ranked.map(
@@ -187,9 +186,9 @@ async function main(): Promise<void> {
     dates: UNKNOWN_DATES,
     collection_pages: pages.length,
     collection_items: pageOrder.length,
-    old_works: ranked.length,
-    page_works: pageOld.length,
-    extras: extras.map((work) => work.id),
+    matched_old_works: oldWorks.size,
+    ranked_works: ranked.length,
+    skipped_extras: extras.map((work) => work.id),
     ranks_sha256: sha256(ranksJson),
   }
   const readme = `# 未记年月的强制排序
@@ -199,7 +198,7 @@ async function main(): Promise<void> {
 - \`date_precision = 'unknown'\`
 - \`sort_rank = 1..${ranked.length}\`
 
-其中 ${pageOld.length} 条来自 Bangumi “看过”收藏页的顺序，${extras.length} 条是收藏页之外的 extra，排在最后。
+其中 ${pageOld.length} 条来自 Bangumi “看过”收藏页的顺序；${extras.length} 条收藏页之外的作品跳过，不自动排名。
 
 ## 应用
 
@@ -223,9 +222,9 @@ bun run scripts/sync-bangumi-ranks.ts --fetch
   writeFileSync(join(OUT_DIR, 'README.md'), readme)
 
   console.log('Bangumi unknown-date ranks built')
-  console.log(`  old works: ${ranked.length}`)
-  console.log(`  from collection page: ${pageOld.length}`)
-  console.log(`  extras: ${extras.length}`)
+  console.log(`  matched old works: ${oldWorks.size}`)
+  console.log(`  ranked from collection page: ${ranked.length}`)
+  console.log(`  skipped extras: ${extras.length}`)
   console.log(`  output: ${OUT_DIR}`)
 }
 

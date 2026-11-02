@@ -106,7 +106,9 @@ watch(
         </div>
         <ol class="history-list">
           <li v-for="(log, index) in logs" :key="index" class="history-item">
-            <span class="history-date">{{ log.logged_on }}</span>
+            <span class="history-date">
+              {{ work.date_precision === 'day' ? log.logged_on : UNKNOWN_DATE_LABEL }}
+            </span>
             <span class="history-text">
               <span v-if="log.round > 1" class="history-round">第 {{ log.round }} 次 · </span>
               {{ describeLog(log, copy) }}
