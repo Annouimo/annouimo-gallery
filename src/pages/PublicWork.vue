@@ -100,18 +100,18 @@ watch(
         <a :href="work.long_review_url" target="_blank" rel="noopener noreferrer">长评 →</a>
       </p>
 
-      <details v-if="logs.length" :key="work.id" class="history">
-        <summary class="history-summary">
+      <section v-if="logs.length" :key="work.id" class="history" aria-labelledby="history-title">
+        <h2 id="history-title" class="history-title">
           {{ copy.progressUnit === '话' ? '观看记录' : '阅读记录' }}
           <span class="history-count">· {{ logs.length }} 条</span>
-        </summary>
+        </h2>
         <ReadingProgressChart
           :logs="logs"
           :copy="copy"
           :dates-known="work.date_precision === 'day'"
           :total="work.total_progress"
         />
-      </details>
+      </section>
     </article>
   </div>
 </template>
@@ -184,11 +184,10 @@ watch(
   margin-top: 3rem;
 }
 
-.history-summary {
-  width: fit-content;
+.history-title {
+  margin: 0;
   font-size: 16px;
   font-weight: 500;
-  cursor: pointer;
 }
 
 .history-count {
@@ -196,10 +195,6 @@ watch(
   font-size: 13px;
   font-weight: 400;
   font-variant-numeric: tabular-nums;
-}
-
-.history[open] > .history-summary {
-  margin-bottom: 0.75rem;
 }
 
 .empty {
