@@ -19,7 +19,7 @@ import SiteSearch from './SiteSearch.vue'
             </RouterLink>
           </li>
           <li>
-            <a class="external-link" href="https://www.annouimo.com/" title="博客">
+            <a class="external-link" href="https://blog.annouimo.com/" title="博客">
               <span>博客</span>&nbsp;
               <svg
                 xmlns="http://www.w3.org/2000/svg"
