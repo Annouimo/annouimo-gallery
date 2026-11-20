@@ -99,11 +99,11 @@ watch(
         <a :href="work.long_review_url" target="_blank" rel="noopener noreferrer">长评 →</a>
       </p>
 
-      <section v-if="logs.length" class="history" aria-labelledby="history-title">
-        <div class="section-head">
-          <h2 id="history-title" class="section-title">完整记录</h2>
-          <span class="section-count">{{ logs.length }}</span>
-        </div>
+      <details v-if="logs.length" :key="work.id" class="history">
+        <summary class="history-summary">
+          {{ copy.progressUnit === '话' ? '观看记录' : '阅读记录' }}
+          <span class="history-count">· {{ logs.length }} 条</span>
+        </summary>
         <ol class="history-list">
           <li v-for="(log, index) in logs" :key="index" class="history-item">
             <span class="history-date">
@@ -115,7 +115,7 @@ watch(
             </span>
           </li>
         </ol>
-      </section>
+      </details>
     </article>
   </div>
 </template>
@@ -188,25 +188,22 @@ watch(
   margin-top: 3rem;
 }
 
-.section-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: flex-start;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+.history-summary {
+  width: fit-content;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
 }
 
-.section-title {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.section-count {
-  font-size: 13px;
+.history-count {
   color: var(--secondary);
+  font-size: 13px;
+  font-weight: 400;
   font-variant-numeric: tabular-nums;
+}
+
+.history[open] > .history-summary {
+  margin-bottom: 0.75rem;
 }
 
 .history-list {

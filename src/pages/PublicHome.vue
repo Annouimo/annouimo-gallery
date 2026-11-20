@@ -113,46 +113,42 @@ watch(
         </ul>
       </section>
 
-      <template v-if="hasResults">
-        <section v-if="reviews.length" class="section" aria-labelledby="reviews-title">
-          <div class="section-head">
-            <h2 id="reviews-title" class="section-title">短评</h2>
-            <span class="section-count">{{ reviews.length }}</span>
-          </div>
+      <section v-if="readCount" class="section" aria-labelledby="archive-title">
+        <div class="section-head">
+          <h2 id="archive-title" class="section-title">{{ copy.readSection }}</h2>
+          <span class="section-count">{{ readCount }}</span>
+        </div>
+
+        <section v-if="reviews.length" class="review-section" aria-labelledby="reviews-title">
+          <h3 id="reviews-title" class="year-label">有短评</h3>
           <ul class="review-list">
             <li v-for="work in reviews" :key="work.id" class="review-item">
-              <h3 class="review-title" :title="work.title">
-                <RouterLink :to="`/works/${work.id}`">{{ work.title }}</RouterLink>
-              </h3>
+              <RouterLink class="review-title" :title="work.title" :to="`/works/${work.id}`">
+                {{ work.title }}
+              </RouterLink>
               <p class="review-text" :title="work.short_review">{{ work.short_review }}</p>
             </li>
           </ul>
         </section>
 
-        <section v-if="archive.length" class="section" aria-labelledby="archive-title">
-          <div class="section-head">
-            <h2 id="archive-title" class="section-title">{{ copy.readSection }}</h2>
-            <span class="section-count">{{ archive.length }}</span>
-          </div>
-          <div
-            v-for="group in archiveGroups"
-            :key="group.key"
-            class="year-group"
-            :class="{ 'unknown-date': group.unknown }"
-          >
-            <h3 v-if="group.label" class="year-label">{{ group.label }}</h3>
-            <ul class="archive-grid">
-              <li v-for="work in group.works" :key="work.id">
-                <RouterLink class="archive-link" :to="`/works/${work.id}`">
-                  {{ work.title }}
-                </RouterLink>
-              </li>
-            </ul>
-          </div>
-        </section>
-      </template>
+        <div
+          v-for="group in archiveGroups"
+          :key="group.key"
+          class="year-group"
+          :class="{ 'unknown-date': group.unknown }"
+        >
+          <h3 v-if="group.label" class="year-label">{{ group.label }}</h3>
+          <ul class="archive-grid">
+            <li v-for="work in group.works" :key="work.id">
+              <RouterLink class="archive-link" :to="`/works/${work.id}`">
+                {{ work.title }}
+              </RouterLink>
+            </li>
+          </ul>
+        </div>
+      </section>
 
-      <p v-else class="empty">
+      <p v-if="!hasResults" class="empty">
         <template v-if="isSearching">
           没有匹配的作品。
           <button class="text-button" type="button" @click="clearSearch">清除搜索</button>
@@ -282,7 +278,7 @@ watch(
   white-space: nowrap;
 }
 
-.review-title a:hover {
+.review-title:hover {
   text-decoration: underline;
   text-underline-offset: 0.25rem;
 }
@@ -299,6 +295,7 @@ watch(
   white-space: nowrap;
 }
 
+.review-section + .year-group,
 .year-group + .year-group {
   margin-top: 1.25rem;
 }
