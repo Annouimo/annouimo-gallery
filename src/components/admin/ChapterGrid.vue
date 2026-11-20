@@ -34,7 +34,7 @@ function select(cell: number): void {
       v-for="cell in cells"
       :key="cell"
       class="cell"
-      :class="{ read: cell <= progress, current: cell === progress + 1 && progress < total }"
+      :class="{ read: cell <= progress, latest: cell === progress, next: cell === progress + 1 }"
       type="button"
       :disabled="disabled"
       :aria-label="`${copy.chapterAriaPrefix} ${cell} ${copy.progressUnit}`"
@@ -59,7 +59,7 @@ function select(cell: number): void {
   font-size: 12px;
   color: var(--secondary);
   background: transparent;
-  border: 1px solid var(--border);
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--background));
   border-radius: 4px;
   cursor: pointer;
 }
@@ -69,12 +69,23 @@ function select(cell: number): void {
 }
 
 .cell.read {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 14%, var(--background));
+}
+
+.cell.latest {
   color: var(--background);
   background: var(--primary);
   border-color: var(--primary);
 }
 
-.cell.current {
+.cell.next {
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.cell:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
