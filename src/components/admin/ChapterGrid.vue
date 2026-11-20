@@ -85,6 +85,18 @@ function select(cell: number): void {
   font-weight: 700;
 }
 
+[data-theme='dark'] .cell.latest {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 34%, var(--background));
+  border-color: color-mix(in srgb, var(--primary) 47%, var(--background));
+  font-weight: 700;
+}
+
+[data-theme='dark'] .cell.next {
+  border-color: color-mix(in srgb, var(--primary) 54%, var(--background));
+  font-weight: 400;
+}
+
 .cell:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;

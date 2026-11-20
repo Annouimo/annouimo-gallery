@@ -120,7 +120,13 @@ async function setCell(work: WorkWithState, cell: number): Promise<void> {
       logged_on: loggedOn.value,
     })
     replaceWork(result.work)
-    if (result.log) recordAction(work, result.log.id, `已记到第 ${cell} ${copyFor(work).progressUnit}`, result.log.logged_on)
+    if (result.log) {
+      const unit = copyFor(work).progressUnit
+      const message = cell < work.state.progress
+        ? `进度从第 ${work.state.progress} ${unit}回退到第 ${cell} ${unit}`
+        : `已记到第 ${cell} ${unit}`
+      recordAction(work, result.log.id, message, result.log.logged_on)
+    }
   } catch (cause) {
     actionError.value = { workId: work.id, message: errorMessage(cause) }
   } finally {
@@ -163,7 +169,7 @@ async function markDone(work: WorkWithState): Promise<void> {
         </button>
         <template v-else>
           <label class="log-date">
-            <span>补录日期</span>
+            <span>{{ loggedOn ? '补录中' : '补录日期' }}</span>
             <input v-model="logDate" type="date" :max="today" :disabled="saving" />
           </label>
           <button class="btn small" type="button" :disabled="saving" @click="useToday">
@@ -188,7 +194,7 @@ async function markDone(work: WorkWithState): Promise<void> {
             <div>
               <h2>
                 <RouterLink :to="`/admin/works/${work.id}`">
-                  {{ work.title }}
+                  {{ work.title }} <span class="work-arrow" aria-hidden="true">→</span>
                 </RouterLink>
               </h2>
               <p class="meta">
@@ -201,9 +207,6 @@ async function markDone(work: WorkWithState): Promise<void> {
             </div>
           </header>
 
-          <p v-if="loggedOn && work.state.status === 'reading'" class="hint backdate">
-            补录于 <time :datetime="loggedOn">{{ loggedOn }}</time>
-          </p>
           <ChapterGrid
             v-if="work.total_progress > 1"
             :total="work.total_progress"
@@ -214,33 +217,30 @@ async function markDone(work: WorkWithState): Promise<void> {
             @select="setCell(work, $event)"
           />
           <div
-            v-if="actions[work.id] || (work.state.status === 'reading' && canMarkDone(work))"
+            v-if="work.state.status === 'reading' && canMarkDone(work)"
             class="progress-actions"
           >
-            <div v-if="actions[work.id]" class="card-actions">
-              <span role="status">{{ actions[work.id]?.message }}</span>
-              <button class="btn small" type="button" :disabled="saving" @click="undo(work.id)">
-                撤销
-              </button>
-              <button
-                v-if="work.state.status === 'done'"
-                class="btn small"
-                type="button"
-                :disabled="saving"
-                @click="delete actions[work.id]"
-              >
-                关闭
-              </button>
-            </div>
-            <div
-              v-if="work.state.status === 'reading' && canMarkDone(work)"
-              class="card-actions"
-            >
+            <div class="card-actions">
               <span v-if="work.total_progress <= 1" class="hint">{{ copyFor(work).binaryHint }}</span>
               <button class="btn" type="button" :disabled="saving" @click="markDone(work)">
                 {{ copyFor(work).markDone }}
               </button>
             </div>
+          </div>
+          <div v-if="actions[work.id]" class="card-actions save-feedback">
+            <span role="status">{{ actions[work.id]?.message }}</span>
+            <button class="btn small" type="button" :disabled="saving" @click="undo(work.id)">
+              撤销
+            </button>
+            <button
+              v-if="work.state.status === 'done'"
+              class="btn small"
+              type="button"
+              :disabled="saving"
+              @click="delete actions[work.id]"
+            >
+              关闭
+            </button>
           </div>
           <p v-if="actionError?.workId === work.id" class="error-banner" role="alert">
             {{ actionError.message }}
@@ -253,6 +253,8 @@ async function markDone(work: WorkWithState): Promise<void> {
 
 <style scoped>
 .dashboard {
+  max-width: 52rem;
+  margin-inline: auto;
   padding-top: 0.5rem;
 }
 
@@ -368,10 +370,24 @@ async function markDone(work: WorkWithState): Promise<void> {
   flex-wrap: wrap;
 }
 
-.backdate {
-  margin: 0 0 0.5rem;
+.work-arrow {
+  color: var(--secondary);
+  font-size: 0.72em;
+}
+
+.save-feedback {
+  position: sticky;
+  z-index: 1;
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.4rem 0.55rem 0.4rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--entry);
   color: var(--primary);
-  font-weight: 600;
+  font-size: 13px;
 }
 
 .btn {
@@ -435,8 +451,5 @@ async function markDone(work: WorkWithState): Promise<void> {
     flex-direction: column;
   }
 
-  .card-actions {
-    width: 100%;
-  }
 }
 </style>
