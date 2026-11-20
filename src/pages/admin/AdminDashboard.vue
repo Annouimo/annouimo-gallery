@@ -2,7 +2,6 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { copyForType } from '../../../shared/categories'
-import { todayLocalDay } from '../../../shared/dates'
 import type { WorkWithState } from '../../../shared/types'
 import ChapterGrid from '../../components/admin/ChapterGrid.vue'
 import { deleteLog, getAdminWorkStates, postProgress, postStatus } from '../../lib/admin-api'
@@ -11,23 +10,16 @@ import { ApiError } from '../../lib/http'
 
 const state = ref<{ works: WorkWithState[] } | null>(null)
 const loading = ref(true)
-const saving = ref(false)
+const pending = ref<{ workId: string; message: string } | null>(null)
+const saving = computed(() => pending.value !== null)
 const error = ref('')
-const today = todayLocalDay()
-const logDate = ref(today)
-const backdating = ref(false)
 const actions = ref<Record<string, { logId: string; message: string }>>({})
 const actionError = ref<{ workId: string; message: string } | null>(null)
-
-function useToday(): void {
-  logDate.value = today
-  backdating.value = false
-}
 
 async function undo(workId: string): Promise<void> {
   const action = actions.value[workId]
   if (!action || saving.value) return
-  saving.value = true
+  pending.value = { workId, message: '正在撤销…' }
   actionError.value = null
   try {
     const result = await deleteLog(action.logId)
@@ -36,7 +28,7 @@ async function undo(workId: string): Promise<void> {
   } catch (cause) {
     actionError.value = { workId, message: errorMessage(cause) }
   } finally {
-    saving.value = false
+    pending.value = null
   }
 }
 
@@ -49,10 +41,6 @@ const reading = computed(() =>
 )
 const visibleWorks = computed(() =>
   (state.value?.works ?? []).filter((work) => work.state.status === 'reading' || actions.value[work.id]),
-)
-
-const loggedOn = computed(() =>
-  logDate.value !== '' && logDate.value !== today ? logDate.value : undefined,
 )
 
 function copyFor(work: WorkWithState) {
@@ -112,16 +100,15 @@ function replaceWork(work: WorkWithState): void {
 async function setCell(work: WorkWithState, cell: number): Promise<void> {
   if (saving.value || cell === work.state.progress) return
 
-  saving.value = true
+  const unit = copyFor(work).progressUnit
+  pending.value = { workId: work.id, message: `正在记录第 ${cell} ${unit}…` }
   actionError.value = null
   try {
     const result = await postProgress(work.id, {
       progress: cell,
-      logged_on: loggedOn.value,
     })
     replaceWork(result.work)
     if (result.log) {
-      const unit = copyFor(work).progressUnit
       const message = cell < work.state.progress
         ? `进度从第 ${work.state.progress} ${unit}回退到第 ${cell} ${unit}`
         : `已记到第 ${cell} ${unit}`
@@ -130,26 +117,25 @@ async function setCell(work: WorkWithState, cell: number): Promise<void> {
   } catch (cause) {
     actionError.value = { workId: work.id, message: errorMessage(cause) }
   } finally {
-    saving.value = false
+    pending.value = null
   }
 }
 
 async function markDone(work: WorkWithState): Promise<void> {
   if (saving.value) return
 
-  saving.value = true
+  pending.value = { workId: work.id, message: `正在${copyFor(work).markDone}…` }
   actionError.value = null
   try {
     const result = await postStatus(work.id, {
       status: 'done',
-      logged_on: loggedOn.value,
     })
     replaceWork(result.work)
     if (result.log) recordAction(work, result.log.id, copyFor(work).status.done, result.log.logged_on)
   } catch (cause) {
     actionError.value = { workId: work.id, message: errorMessage(cause) }
   } finally {
-    saving.value = false
+    pending.value = null
   }
 }
 </script>
@@ -162,20 +148,6 @@ async function markDone(work: WorkWithState): Promise<void> {
         <p v-if="state" class="muted">
           {{ reading.length }} 项进行中
         </p>
-      </div>
-      <div v-if="state" class="date-controls">
-        <button v-if="!backdating" class="btn small" type="button" @click="backdating = true">
-          补录
-        </button>
-        <template v-else>
-          <label class="log-date">
-            <span>{{ loggedOn ? '补录中' : '补录日期' }}</span>
-            <input v-model="logDate" type="date" :max="today" :disabled="saving" />
-          </label>
-          <button class="btn small" type="button" :disabled="saving" @click="useToday">
-            恢复今天
-          </button>
-        </template>
       </div>
     </header>
 
@@ -227,24 +199,29 @@ async function markDone(work: WorkWithState): Promise<void> {
               </button>
             </div>
           </div>
-          <div v-if="actions[work.id]" class="card-actions save-feedback">
-            <span role="status">{{ actions[work.id]?.message }}</span>
-            <button class="btn small" type="button" :disabled="saving" @click="undo(work.id)">
-              撤销
-            </button>
-            <button
-              v-if="work.state.status === 'done'"
-              class="btn small"
-              type="button"
-              :disabled="saving"
-              @click="delete actions[work.id]"
-            >
-              关闭
-            </button>
+          <div
+            v-if="pending?.workId === work.id || actionError?.workId === work.id || actions[work.id]"
+            class="card-actions save-feedback"
+          >
+            <span v-if="actionError?.workId === work.id" role="alert">{{ actionError.message }}</span>
+            <span v-else role="status">
+              {{ pending?.workId === work.id ? pending.message : actions[work.id]?.message }}
+            </span>
+            <template v-if="actions[work.id] && pending?.workId !== work.id">
+              <button class="btn small" type="button" :disabled="saving" @click="undo(work.id)">
+                撤销
+              </button>
+              <button
+                v-if="work.state.status === 'done'"
+                class="btn small"
+                type="button"
+                :disabled="saving"
+                @click="delete actions[work.id]"
+              >
+                关闭
+              </button>
+            </template>
           </div>
-          <p v-if="actionError?.workId === work.id" class="error-banner" role="alert">
-            {{ actionError.message }}
-          </p>
         </article>
       </div>
     </template>
@@ -253,8 +230,6 @@ async function markDone(work: WorkWithState): Promise<void> {
 
 <style scoped>
 .dashboard {
-  max-width: 52rem;
-  margin-inline: auto;
   padding-top: 0.5rem;
 }
 
@@ -276,28 +251,6 @@ async function markDone(work: WorkWithState): Promise<void> {
   margin: 0;
   font-size: 14px;
   color: var(--secondary);
-}
-
-.log-date {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 13px;
-  color: var(--secondary);
-}
-
-.log-date input {
-  padding: 0.35rem 0.5rem;
-  font-size: 13px;
-  color: var(--primary);
-  background: var(--code-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  outline: none;
-}
-
-.log-date input:focus {
-  border-color: var(--primary);
 }
 
 .hint {
@@ -354,7 +307,6 @@ async function markDone(work: WorkWithState): Promise<void> {
   gap: 0.75rem;
 }
 
-.date-controls,
 .progress-actions {
   display: flex;
   flex-wrap: wrap;
@@ -414,15 +366,6 @@ async function markDone(work: WorkWithState): Promise<void> {
   opacity: 0.6;
 }
 
-.error-banner {
-  margin: 1rem 0 0;
-  padding: 0.6rem 0.75rem;
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--primary);
-  border-left: 2px solid var(--primary);
-}
-
 .empty {
   padding: 2rem 0;
   color: var(--secondary);
@@ -440,11 +383,6 @@ async function markDone(work: WorkWithState): Promise<void> {
 
   .dash-header h1 {
     font-size: 32px;
-  }
-
-  .log-date {
-    width: 100%;
-    justify-content: space-between;
   }
 
   .card-head {

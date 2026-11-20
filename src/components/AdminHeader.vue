@@ -62,7 +62,7 @@ onMounted(async () => {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem 1.5rem;
-  max-width: calc(1200px + var(--gap) * 2);
+  max-width: calc(var(--admin-content-width, 1200px) + var(--gap) * 2);
   min-height: var(--header-height);
   margin: auto;
   padding: 0 var(--gap);
@@ -142,6 +142,26 @@ onMounted(async () => {
 
   .email {
     display: none;
+  }
+
+  .admin-header.home-width .admin-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 0.5rem;
+  }
+
+  .admin-header.home-width .brand {
+    font-size: 16px;
+    gap: 0.25rem;
+  }
+
+  .admin-header.home-width .admin-account {
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .admin-header.home-width .admin-nav {
+    grid-column: 1 / -1;
   }
 }
 </style>
