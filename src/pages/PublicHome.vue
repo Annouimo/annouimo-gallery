@@ -120,7 +120,7 @@ watch(
         </div>
 
         <section v-if="reviews.length" class="review-section" aria-labelledby="reviews-title">
-          <h3 id="reviews-title" class="year-label">有短评</h3>
+          <h3 id="reviews-title" class="year-label">短评</h3>
           <ul class="review-list">
             <li v-for="work in reviews" :key="work.id" class="review-item">
               <RouterLink class="review-title" :title="work.title" :to="`/works/${work.id}`">

@@ -5,7 +5,8 @@ import { categoryForType, copyForType } from '../../shared/categories'
 import { UNKNOWN_DATE_LABEL } from '../../shared/constants'
 import type { PublicWorkDetail } from '../../shared/types'
 import { ApiError, getPublicWork } from '../lib/api'
-import { describeLog, progressSummary, statusLabel } from '../lib/format'
+import ReadingProgressChart from '../components/ReadingProgressChart.vue'
+import { progressSummary, statusLabel } from '../lib/format'
 
 const route = useRoute()
 const detail = ref<PublicWorkDetail | null>(null)
@@ -104,17 +105,12 @@ watch(
           {{ copy.progressUnit === '话' ? '观看记录' : '阅读记录' }}
           <span class="history-count">· {{ logs.length }} 条</span>
         </summary>
-        <ol class="history-list">
-          <li v-for="(log, index) in logs" :key="index" class="history-item">
-            <span class="history-date">
-              {{ work.date_precision === 'day' ? log.logged_on : UNKNOWN_DATE_LABEL }}
-            </span>
-            <span class="history-text">
-              <span v-if="log.round > 1" class="history-round">第 {{ log.round }} 次 · </span>
-              {{ describeLog(log, copy) }}
-            </span>
-          </li>
-        </ol>
+        <ReadingProgressChart
+          :logs="logs"
+          :copy="copy"
+          :dates-known="work.date_precision === 'day'"
+          :total="work.total_progress"
+        />
       </details>
     </article>
   </div>
@@ -206,35 +202,6 @@ watch(
   margin-bottom: 0.75rem;
 }
 
-.history-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.history-item {
-  display: flex;
-  gap: 1rem;
-  padding: 0.45rem 0;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--content);
-}
-
-.history-date {
-  flex: 0 0 7.5rem;
-  color: var(--secondary);
-  font-variant-numeric: tabular-nums;
-}
-
-.history-text {
-  min-width: 0;
-}
-
-.history-round {
-  color: var(--secondary);
-}
-
 .empty {
   padding: 2rem 0;
   color: var(--secondary);
@@ -245,14 +212,4 @@ watch(
   text-underline-offset: 0.25rem;
 }
 
-@media (max-width: 768px) {
-  .history-item {
-    flex-direction: column;
-    gap: 0.2rem;
-  }
-
-  .history-date {
-    flex: none;
-  }
-}
 </style>
