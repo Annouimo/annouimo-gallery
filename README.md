@@ -522,7 +522,7 @@ WHERE w.deleted_at IS NULL;
   - 浅色/深色使用原版 `--theme / --entry / --primary / --secondary / --tertiary / --content / --code-bg / --border`
 - 字体：原版系统字体栈，补中文 fallback（PingFang SC / Hiragino Sans GB / Microsoft YaHei）。
 - 头部：logo 24px/700，菜单 16px，active 下划线，右侧太阳/月亮切换。
-- 主题：`data-theme` + `localStorage['pref-theme']`，与原版 PaperMod 行为一致。
+- 主题：通过 `prefers-color-scheme` 跟随系统设置。
 - 正文：18px/1.6；页面标题 40px；区块标题 24px；meta 14px `--secondary`。
 - 首页：无卡片；短评行用 `--border` 分隔；标题区 2–3 列。
 - 详情：PaperMod post 布局；长评链接下划线。

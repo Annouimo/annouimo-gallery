@@ -2,7 +2,6 @@
 import { RouterLink } from 'vue-router'
 import { CATEGORIES } from '../../shared/categories'
 import SiteSearch from './SiteSearch.vue'
-import ThemeToggle from './ThemeToggle.vue'
 </script>
 
 <template>
@@ -10,7 +9,6 @@ import ThemeToggle from './ThemeToggle.vue'
     <nav class="header-nav" aria-label="主导航">
       <div class="logo">
         <RouterLink class="logo-link" to="/">Annouimo 的陈列室</RouterLink>
-        <ThemeToggle />
       </div>
 
       <div class="nav-right">

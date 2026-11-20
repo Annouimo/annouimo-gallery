@@ -2,7 +2,6 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { getAccessMe } from '../lib/admin-api'
-import ThemeToggle from './ThemeToggle.vue'
 
 const route = useRoute()
 const email = ref('')
@@ -46,7 +45,6 @@ onMounted(async () => {
 
       <div class="admin-account">
         <a class="public-link" href="/" target="_blank" rel="noreferrer">公开站点 ↗</a>
-        <ThemeToggle />
         <span v-if="email" class="email" :title="email">{{ email }}</span>
         <a v-if="!isLocal" class="logout" href="/cdn-cgi/access/logout">退出</a>
       </div>
