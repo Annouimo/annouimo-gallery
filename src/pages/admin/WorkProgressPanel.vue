@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, nextTick, ref } from 'vue'
 import { copyForType } from '../../../shared/categories'
 import { todayLocalDay } from '../../../shared/dates'
-import type { AdminWorkDetail, WorkStatus, WorkWithState } from '../../../shared/types'
+import type { AdminMutationResult, AdminUndoResult, AdminWorkDetail, WorkStatus } from '../../../shared/types'
 import {
   deleteLog,
-  getAdminWork,
   postProgress,
   postRound,
   postStatus,
@@ -18,13 +16,9 @@ import ChapterGrid from '../../components/admin/ChapterGrid.vue'
 type StatusAction = 'reading' | 'done' | 'paused' | 'dropped'
 type PromptMode = 'status' | 'round'
 
-const props = defineProps<{ workId: string }>()
-const emit = defineEmits<{ updated: [work: WorkWithState] }>()
-
-const detail = ref<AdminWorkDetail | null>(null)
-const loading = ref(true)
+const props = defineProps<{ detail: AdminWorkDetail }>()
+const emit = defineEmits<{ updated: [detail: AdminWorkDetail] }>()
 const saving = ref(false)
-const notFound = ref(false)
 const error = ref('')
 
 const showChapterPrompt = ref(false)
@@ -36,8 +30,8 @@ const undoingId = ref<string | null>(null)
 const today = todayLocalDay()
 const logDate = ref(today)
 
-const work = computed(() => detail.value?.work ?? null)
-const logs = computed(() => detail.value?.logs ?? [])
+const work = computed(() => props.detail.work)
+const logs = computed(() => props.detail.logs)
 const copy = computed(() => copyForType(work.value?.type ?? ''))
 const latestLog = computed(() => logs.value.at(-1) ?? null)
 const history = computed(() => [...logs.value].reverse())
@@ -109,41 +103,18 @@ function errorMessage(cause: unknown): string {
   return cause.message
 }
 
-async function load(id: string): Promise<void> {
-  loading.value = true
-  error.value = ''
-  notFound.value = false
-  detail.value = null
-
-  try {
-    detail.value = await getAdminWork(id)
-  } catch (cause) {
-    if (cause instanceof ApiError && cause.status === 404) {
-      notFound.value = true
-    } else {
-      error.value = errorMessage(cause)
-    }
-  } finally {
-    loading.value = false
-  }
-}
-
-async function refresh(): Promise<void> {
-  const id = work.value?.id
-  if (!id) return
-  detail.value = await getAdminWork(id)
-  undoingId.value = null
-  emit('updated', detail.value.work)
-}
-
-async function run(action: () => Promise<unknown>): Promise<boolean> {
+async function run(action: () => Promise<AdminMutationResult | AdminUndoResult>): Promise<boolean> {
   if (saving.value) return false
   saving.value = true
   error.value = ''
 
   try {
-    await action()
-    await refresh()
+    const result = await action()
+    const nextLogs = 'deleted' in result
+      ? logs.value.filter((log) => log.id !== result.deleted.id)
+      : result.log ? [...logs.value, result.log] : logs.value
+    undoingId.value = null
+    emit('updated', { work: result.work, logs: nextLogs })
     return true
   } catch (cause) {
     error.value = errorMessage(cause)
@@ -247,33 +218,11 @@ async function undo(id: string): Promise<void> {
   undoingId.value = null
   await run(() => deleteLog(id))
 }
-
-watch(
-  () => props.workId,
-  (id) => {
-    if (id) {
-      void load(id)
-    } else {
-      notFound.value = true
-      loading.value = false
-    }
-  },
-  { immediate: true },
-)
 </script>
 
 <template>
   <div class="progress-page">
-    <p v-if="loading" class="empty">正在加载…</p>
-
-    <p v-else-if="notFound" class="empty">
-      没有找到这个作品。
-      <RouterLink to="/admin/library">返回作品库</RouterLink>
-    </p>
-
-    <p v-else-if="error && !work" class="empty" role="alert">{{ error }}</p>
-
-    <template v-else-if="work">
+    <template v-if="work">
       <div class="action-bar">
         <div class="action-state">
           <strong>{{ copy.status[status] }}</strong>

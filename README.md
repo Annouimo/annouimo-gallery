@@ -40,7 +40,7 @@
   - 启用 Preview Builds
   - Preview command = `bun run preview:ci`
   - `dev` push 后预览地址形如 `dev.gallery.annouimo.com`
-- Previews 不继承 production 设置；`wrangler.jsonc` 的 `previews` 块提供 D1 binding。当前 preview 指向同一个 D1，写功能上线前应换成独立 preview D1。
+- Previews 不继承 production 设置；`wrangler.jsonc` 的 `previews` 块提供 D1 binding。预览使用独立的 media-tracker-preview D1，仅存放演示数据。
 
 ---
 

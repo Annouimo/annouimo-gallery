@@ -59,6 +59,12 @@ async function readBody<T>(c: Context<AppEnv>, schema: ZodType<T>): Promise<T | 
   return parsed.data
 }
 
+adminRoutes.get('/work-states', async (c) => {
+  const works = await listWorksWithState(c.env.MEDIA_TRACKER_DB)
+  noStore(c)
+  return c.json({ works })
+})
+
 adminRoutes.get('/state', async (c) => {
   const state = await getAdminState(c.env.MEDIA_TRACKER_DB)
   noStore(c)

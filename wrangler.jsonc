@@ -31,8 +31,8 @@
     "d1_databases": [
       {
         "binding": "MEDIA_TRACKER_DB",
-        "database_name": "media-tracker-db",
-        "database_id": "7d60ec75-c0e4-44f4-89e2-b8addfd7d9ac"
+        "database_name": "media-tracker-preview",
+        "database_id": "096ea44c-f0e7-4660-9ea1-d6c5d1c4e0ce"
       }
     ]
   }

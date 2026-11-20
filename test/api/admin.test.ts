@@ -57,6 +57,20 @@ describe('admin API access', () => {
     await expect(response.json()).resolves.toEqual({ email: 'dev@localhost' })
   })
 
+  it('lists current work states without including the full log history', async () => {
+    const response = await adminFetch('/work-states')
+    expect(response.status).toBe(200)
+    expect(response.headers.get('cache-control')).toContain('no-store')
+
+    const body = await response.json() as Pick<AdminState, 'works'>
+    expect(body.works).toHaveLength(6)
+    expect(body.works).toContainEqual(expect.objectContaining({
+      id: 'w-reading',
+      state: expect.objectContaining({ status: 'reading', progress: 3 }),
+    }))
+    expect(body).not.toHaveProperty('logs')
+  })
+
   it('lists work summaries for duplicate checks', async () => {
     const response = await adminFetch('/works')
     expect(response.status).toBe(200)

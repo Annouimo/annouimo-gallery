@@ -56,7 +56,17 @@ async function load(id: string): Promise<void> {
 function updateWork(next: WorkWithState): void {
   if (!detail.value) return
   detail.value = { work: next, logs: detail.value.logs }
-  document.title = `${next.title} · Annouimo 的陈列室`
+  documentTitle(next)
+}
+
+function updateDetail(next: AdminWorkDetail): void {
+  if (next.work.id !== workId.value) return
+  detail.value = next
+  documentTitle(next.work)
+}
+
+function documentTitle(work: WorkWithState): void {
+  document.title = `${work.title} · Annouimo 的陈列室`
 }
 
 function setTab(next: Tab): void {
@@ -100,7 +110,7 @@ watch(
 
     <p v-else-if="error && !work" class="empty" role="alert">{{ error }}</p>
 
-    <template v-else-if="work">
+    <template v-else-if="detail && work">
       <div class="crumb-row">
         <AdminBreadcrumb
           :items="[
@@ -163,8 +173,8 @@ watch(
       >
         <WorkProgressPanel
           :key="`progress-${work.id}`"
-          :work-id="work.id"
-          @updated="updateWork"
+          :detail="detail"
+          @updated="updateDetail"
         />
       </div>
       <div
@@ -175,7 +185,7 @@ watch(
       >
         <WorkMetadataPanel
           :key="`metadata-${work.id}`"
-          :work-id="work.id"
+          :work="work"
           @saved="updateWork"
           @dirty="metadataDirty = $event"
           @cancel="setTab('progress')"

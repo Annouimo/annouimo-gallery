@@ -5,12 +5,12 @@ import { categoryForType, copyForType } from '../../../shared/categories'
 import { NEUTRAL_STATUS } from '../../../shared/category-copy'
 import { STATUS_ORDER } from '../../../shared/constants'
 import { localDayFromEpoch } from '../../../shared/dates'
-import type { AdminState, WorkStatus, WorkWithState } from '../../../shared/types'
-import { getAdminState } from '../../lib/admin-api'
+import type { WorkStatus, WorkWithState } from '../../../shared/types'
+import { getAdminWorkStates } from '../../lib/admin-api'
 import { progressLabel, relativeDay } from '../../lib/format'
 import { ApiError } from '../../lib/http'
 
-const data = ref<AdminState | null>(null)
+const data = ref<{ works: WorkWithState[] } | null>(null)
 const loading = ref(true)
 const error = ref('')
 
@@ -132,7 +132,7 @@ function errorMessage(cause: unknown): string {
 onMounted(async () => {
   document.title = '作品库 · Annouimo 的陈列室'
   try {
-    data.value = await getAdminState()
+    data.value = await getAdminWorkStates()
   } catch (cause) {
     error.value = errorMessage(cause)
   } finally {

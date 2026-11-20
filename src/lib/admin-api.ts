@@ -7,15 +7,15 @@ import type {
 } from '../../shared/schemas'
 import type {
   AdminMutationResult,
-  AdminState,
+  WorkWithState,
   AdminUndoResult,
   AdminWorkDetail,
   WorkSummary,
 } from '../../shared/types'
 import { getJson, requestJson } from './http'
 
-export function getAdminState(): Promise<AdminState> {
-  return getJson<AdminState>('/admin/api/state')
+export function getAdminWorkStates(): Promise<{ works: WorkWithState[] }> {
+  return getJson<{ works: WorkWithState[] }>('/admin/api/work-states')
 }
 
 export function getWorkSummaries(): Promise<{ works: WorkSummary[] }> {
