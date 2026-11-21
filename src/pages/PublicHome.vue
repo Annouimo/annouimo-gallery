@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import SiteSearch from '../components/SiteSearch.vue'
 import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { copyForCategory, findCategory } from '../../shared/categories'
@@ -93,6 +94,8 @@ watch(
         <button class="text-button" type="button" @click="clearSearch">清除</button>
       </p>
     </header>
+
+    <SiteSearch />
 
     <p v-if="loading" class="empty">正在加载…</p>
     <p v-else-if="error" class="empty" role="alert">{{ error }}</p>

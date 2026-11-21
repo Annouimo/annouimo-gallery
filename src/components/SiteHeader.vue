@@ -3,43 +3,23 @@ import { RouterLink } from 'vue-router'
 import { CATEGORIES } from '../../shared/categories'
 import '../../.shared-design/tokens.css'
 import '../../.shared-design/navigation.css'
-import SiteSearch from './SiteSearch.vue'
 
-const homeUrl = import.meta.env.VITE_HOME_URL || 'https://www.annouimo.com/'
+const homeUrl = location.hostname === 'shared-design.gallery.annouimo.com'
+  ? 'https://shared-design.www.annouimo.com/'
+  : 'https://www.annouimo.com/'
 </script>
 
 <template>
-  <header class="header">
-    <nav class="ann-topbar" aria-label="主导航">
-      <a class="ann-home-link" :href="homeUrl">个人主页</a>
-      <div class="logo">
-        <RouterLink class="logo-link" to="/">书与影</RouterLink>
-      </div>
-
-      <div class="nav-right">
-        <ul class="menu">
-          <li v-for="category in CATEGORIES" :key="category.slug">
-            <RouterLink :to="category.path" exact-active-class="active">
-              {{ category.label }}
-            </RouterLink>
-          </li>
-        </ul>
-        <SiteSearch />
-      </div>
+  <header class="header ann-topbar">
+    <div class="ann-site-identity">
+      <a :href="homeUrl" aria-label="Annouimo 的个人主页">Annouimo</a>
+      <span aria-hidden="true">›</span>
+      <RouterLink to="/">书与影</RouterLink>
+    </div>
+    <nav class="ann-topbar-nav" aria-label="站内导航">
+      <RouterLink v-for="category in CATEGORIES" :key="category.slug" :to="category.path">
+        {{ category.label }}
+      </RouterLink>
     </nav>
   </header>
 </template>
-
-<style scoped>
-.nav-right {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  column-gap: var(--gap);
-}
-@media (max-width: 520px) {
-  .nav-right { justify-content: space-between; width: 100%; column-gap: 12px; }
-  .menu { flex: 1; gap: 14px; }
-}
-</style>
