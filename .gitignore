@@ -29,3 +29,5 @@ reference/
 
 # test output
 coverage/
+
+/.shared-design/

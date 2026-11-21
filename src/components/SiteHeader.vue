@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import { CATEGORIES } from '../../shared/categories'
+import sites from '../../.shared-design/sites.json'
+import '../../.shared-design/tokens.css'
+import '../../.shared-design/navigation.css'
 import SiteSearch from './SiteSearch.vue'
 </script>
 
@@ -18,7 +21,7 @@ import SiteSearch from './SiteSearch.vue'
               {{ category.label }}
             </RouterLink>
           </li>
-          <li><a class="home-link" href="https://annouimo.com/">个人主页</a></li>
+          <li class="ann-site-nav" v-for="site in sites.filter(item => item.id !== 'gallery')" :key="site.id"><a :href="site.url">{{ site.name }}</a></li>
         </ul>
         <SiteSearch />
       </div>

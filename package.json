@@ -5,9 +5,9 @@
   "type": "module",
   "packageManager": "bun@1.4.3",
   "scripts": {
-    "dev": "vite",
-    "dev:node": "node node_modules/vite/bin/vite.js",
-    "build": "bun run typecheck && vite build",
+    "dev": "python3 scripts/sync-design.py && vite",
+    "dev:node": "python3 scripts/sync-design.py && node node_modules/vite/bin/vite.js",
+    "build": "python3 scripts/sync-design.py && bun run typecheck && vite build",
     "preview": "bun run build && vite preview",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.worker.json",
     "deploy": "bun run build && wrangler deploy",

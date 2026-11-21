@@ -21,27 +21,27 @@ import SiteHeader from '../components/SiteHeader.vue'
   flex-direction: column;
   color: var(--primary);
   background: var(--theme);
-  --theme: #f5f4ed;
+  --theme: var(--ann-canvas);
   --background: #faf9f5;
   --entry: #faf9f5;
-  --primary: #262824;
-  --secondary: #595d55;
-  --tertiary: #edede3;
-  --content: #262824;
-  --border: #d8d7cb;
-  --ink: #1b365d;
+  --primary: var(--ann-text);
+  --secondary: var(--ann-muted);
+  --tertiary: var(--ann-hover);
+  --content: var(--ann-text);
+  --border: var(--ann-border);
+  --ink: var(--ann-accent);
 }
 @media (prefers-color-scheme: dark) {
   .public-layout {
-    --theme: #20211e;
+    --theme: var(--ann-canvas);
     --background: #292a25;
     --entry: #292a25;
-    --primary: #edede2;
-    --secondary: #b8b9ad;
-    --tertiary: #2b2d27;
-    --content: #edede2;
-    --border: #41433b;
-    --ink: #acc7eb;
+    --primary: var(--ann-text);
+    --secondary: var(--ann-muted);
+    --tertiary: var(--ann-hover);
+    --content: var(--ann-text);
+    --border: var(--ann-border);
+    --ink: var(--ann-accent);
   }
 }
 .public-layout .page-title,
