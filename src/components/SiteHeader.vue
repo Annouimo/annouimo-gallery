@@ -8,7 +8,7 @@ import SiteSearch from './SiteSearch.vue'
   <header class="header">
     <nav class="header-nav" aria-label="主导航">
       <div class="logo">
-        <RouterLink class="logo-link" to="/">Annouimo 的陈列室</RouterLink>
+        <RouterLink class="logo-link" to="/">书与影</RouterLink>
       </div>
 
       <div class="nav-right">
@@ -18,29 +18,7 @@ import SiteSearch from './SiteSearch.vue'
               {{ category.label }}
             </RouterLink>
           </li>
-          <li>
-            <a class="external-link" href="https://blog.annouimo.com/" title="博客">
-              <span>博客</span>&nbsp;
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                shape-rendering="geometricPrecision"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2.5"
-                viewBox="0 0 24 24"
-                height="12"
-                width="12"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
-                <path d="M15 3h6v6" />
-                <path d="M10 14L21 3" />
-              </svg>
-            </a>
-          </li>
+          <li><a class="home-link" href="https://annouimo.com/">个人主页</a></li>
         </ul>
         <SiteSearch />
       </div>
@@ -55,5 +33,11 @@ import SiteSearch from './SiteSearch.vue'
   align-items: center;
   justify-content: flex-end;
   column-gap: var(--gap);
+}
+.home-link { color: var(--ink); }
+@media (max-width: 520px) {
+  .header-nav { padding-block: 14px; row-gap: 8px; }
+  .nav-right { justify-content: space-between; width: 100%; column-gap: 12px; }
+  .menu { flex: 1; gap: 14px; }
 }
 </style>

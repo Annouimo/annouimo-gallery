@@ -61,7 +61,7 @@ async function load(slug: string): Promise<void> {
     return
   }
 
-  document.title = `${category.label} · Annouimo 的陈列室`
+  document.title = `${category.label} · 书与影`
   try {
     data.value = await getPublicCategory(slug)
   } catch (cause) {
