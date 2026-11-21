@@ -17,7 +17,8 @@
     "export:bangumi": "bun run scripts/export-bangumi.ts",
     "sync:bangumi-ranks": "bun run scripts/sync-bangumi-ranks.ts",
     "test:watch": "node node_modules/vitest/vitest.mjs",
-    "typecheck:test": "tsc --noEmit -p tsconfig.test.json"
+    "typecheck:test": "tsc --noEmit -p tsconfig.test.json",
+    "pretypecheck": "python3 scripts/sync-design.py"
   },
   "dependencies": {
     "hono": "^4.13.14",
