@@ -82,9 +82,9 @@ watch(
 
 <template>
   <div class="home">
-    <header class="page-head">
+    <header class="page-head ann-page-heading">
       <h1 class="page-title">{{ categoryLabel }}</h1>
-      <p v-if="!loading && !error" class="page-meta">
+      <p v-if="!loading && !error" class="page-meta ann-heading-details">
         {{ copy.readSection }} {{ readCount }} {{ copy.unit }} ·
         {{ copy.status.reading }} {{ reading.length }} {{ copy.unit }}
       </p>

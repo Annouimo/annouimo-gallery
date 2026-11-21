@@ -79,9 +79,9 @@ watch(
         </RouterLink>
       </p>
 
-      <header class="work-header">
+      <header class="work-header ann-page-heading">
         <h1 class="work-title">{{ work.title }}</h1>
-        <p class="meta">
+        <p class="meta ann-heading-details">
           <span v-if="work.creator">{{ work.creator }}</span>
           <span v-if="work.release_year">{{ work.release_year }}</span>
           <span>{{ typeLabel }}</span>
